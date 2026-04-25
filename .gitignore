@@ -4,6 +4,4 @@ venv/
 __pycache__/
 *.pyc
 mlruns/
-*.json
-!package.json
 data/cache/
