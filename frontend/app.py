@@ -1,8 +1,6 @@
 import streamlit as st
 import plotly.express as px
 import pandas as pd
-import firebase_admin
-from firebase_admin import credentials, firestore
 import xgboost as xgb
 import numpy as np
 import sys, os
@@ -11,21 +9,17 @@ from llm.commentator import commentate, ask_race_question
 
 st.set_page_config(page_title="PitWall AI", page_icon="🏎", layout="wide")
 
-if not firebase_admin._apps:
-    cred = credentials.Certificate("firebase-key.json")
-    firebase_admin.initialize_app(cred)
-db = firestore.client()
-
 @st.cache_resource
 def load_model():
     model = xgb.XGBRegressor()
     model.load_model("models/race_predictor.json")
     return model
 
-@st.cache_data(ttl=300)
+@st.cache_data
 def load_laps():
-    docs = db.collection("laps").stream()
-    return pd.DataFrame([d.to_dict() for d in docs])
+    if os.path.exists("data/laps.csv"):
+        return pd.read_csv("data/laps.csv")
+    return pd.DataFrame()
 
 model = load_model()
 st.title("🏎 PitWall AI — F1 Intelligence Platform")
@@ -36,18 +30,21 @@ tab1,tab2,tab3,tab4 = st.tabs(["📊 Analytics","⏱ Predictor","🎙 Commentato
 with tab1:
     st.subheader("Race Analytics")
     df = load_laps()
-    col1,col2,col3 = st.columns(3)
-    col1.metric("Total Laps", f"{len(df):,}")
-    col2.metric("Races", df["gp"].nunique())
-    col3.metric("Drivers", df["driver"].nunique())
-    gp = st.selectbox("Select race", df["gp"].unique())
-    race_df = df[df["gp"]==gp]
-    fig = px.line(race_df.sort_values("lap"), x="lap", y="lap_time_s",
-                  color="driver", title=f"Lap times — {gp}")
-    st.plotly_chart(fig, use_container_width=True)
-    fig2 = px.box(race_df, x="compound", y="lap_time_s",
-                  color="compound", title=f"Tyre performance — {gp}")
-    st.plotly_chart(fig2, use_container_width=True)
+    if df.empty:
+        st.warning("No data loaded")
+    else:
+        col1,col2,col3 = st.columns(3)
+        col1.metric("Total Laps", f"{len(df):,}")
+        col2.metric("Races", df["gp"].nunique())
+        col3.metric("Drivers", df["driver"].nunique())
+        gp = st.selectbox("Select race", df["gp"].unique())
+        race_df = df[df["gp"]==gp]
+        fig = px.line(race_df.sort_values("lap"), x="lap", y="lap_time_s",
+                      color="driver", title=f"Lap times — {gp}")
+        st.plotly_chart(fig, use_container_width=True)
+        fig2 = px.box(race_df, x="compound", y="lap_time_s",
+                      color="compound", title=f"Tyre performance — {gp}")
+        st.plotly_chart(fig2, use_container_width=True)
 
 with tab2:
     st.subheader("Lap Time Predictor")
