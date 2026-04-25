@@ -1,0 +1,14 @@
+fastf1
+pandas
+numpy
+requests
+firebase-admin
+fastapi
+uvicorn
+scikit-learn
+xgboost
+streamlit
+plotly
+groq
+python-dotenv
+mlflow
