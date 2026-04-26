@@ -1,7 +1,7 @@
 # 🏎 PitWall AI — F1 Intelligence Platform
  
 <div align="center">
-![PitWall AI Banner](https://img.shields.io/badge/PitWall-AI-e8001d?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48dGV4dCB5PSIuOWVtIiBmb250LXNpemU9IjkwIj7wn4+OPC90ZXh0Pjwvc3ZnPg==&logoColor=white)
+
  
 **Real F1 telemetry · XGBoost ML · LLM Commentary · Live Deployed**
  
