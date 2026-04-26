@@ -75,8 +75,39 @@ with tab3:
             st.info(result)
 
 with tab4:
-    st.subheader("Ask the AI anything about F1")
-    q = st.text_input("Question","Why would a driver pit early on lap 20?")
-    if st.button("Ask", type="primary"):
-        with st.spinner("Thinking..."):
-            st.write(ask_race_question(q, {"race":"Monaco","lap":20,"leader":"VER"}))
+    st.subheader("🤖 Ask Anything About F1")
+    st.caption("Powered by Groq LLaMA 70B — ask about strategy, tyres, drivers, our dataset")
+
+    if "messages" not in st.session_state:
+        st.session_state.messages = [
+            {"role": "assistant", "content": "👋 Welcome to PitWall AI! Ask me anything about F1 — race strategy, tyre degradation, lap times, or anything from our 6,745-lap dataset!"}
+        ]
+
+    for msg in st.session_state.messages:
+        with st.chat_message(msg["role"]):
+            st.write(msg["content"])
+
+    st.caption("Quick questions:")
+    col1, col2, col3, col4 = st.columns(4)
+    quick = None
+    if col1.button("Monaco strategy"): quick = "Best tyre strategy for Monaco?"
+    if col2.button("Tyre degradation"): quick = "How does tyre degradation work?"
+    if col3.button("Undercut vs overcut"): quick = "Explain undercut vs overcut strategy"
+    if col4.button("VER 2023"): quick = "Why did Verstappen dominate 2023?"
+
+    prompt = st.chat_input("Ask about F1 strategy, tyres, drivers...") or quick
+
+    if prompt:
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.write(prompt)
+        with st.chat_message("assistant"):
+            with st.spinner("Thinking..."):
+                context = {
+                    "dataset": "6745 laps from 6 races 2023-2024",
+                    "races": ["Bahrain", "Saudi Arabia", "Australia", "Monaco"],
+                    "model_mae": "1.44s XGBoost"
+                }
+                answer = ask_race_question(prompt, context)
+                st.write(answer)
+                st.session_state.messages.append({"role": "assistant", "content": answer})
