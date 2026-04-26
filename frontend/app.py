@@ -493,7 +493,7 @@ with tab2:
         fig_m.update_layout(
             **PLOT_THEME,
             height=180,
-            xaxis=dict(range=[0,120], **PLOT_THEME['xaxis']),
+            xaxis_range=[0, 120],
             showlegend=False,
         )
         st.plotly_chart(fig_m, use_container_width=True)
