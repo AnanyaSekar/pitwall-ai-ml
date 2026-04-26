@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PitWall AI — F1 Intelligence Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --red:#e8001d;--red-glow:rgba(232,0,29,0.3);
+  --white:#f0ede8;--muted:rgba(240,237,232,0.45);
+  --glass:rgba(255,255,255,0.03);--glass-b:rgba(255,255,255,0.08);
+  --bg:#050505;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--white);font-family:'DM Sans',sans-serif;overflow-x:hidden}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--red)}
+
+/* CANVAS HERO */
+#hero{position:relative;height:100vh;overflow:hidden;cursor:pointer}
+#three-canvas{position:absolute;inset:0;width:100%;height:100%}
+
+/* VIGNETTE */
+#hero::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at center,transparent 30%,rgba(5,5,5,0.7) 100%);
+  pointer-events:none;
+}
+
+/* HERO CONTENT */
+.hero-content{
+  position:absolute;inset:0;z-index:10;
+  display:flex;flex-direction:column;
+  justify-content:center;align-items:center;
+  text-align:center;pointer-events:none;
+}
+.hero-eyebrow{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;letter-spacing:0.35em;color:var(--red);
+  text-transform:uppercase;margin-bottom:28px;
+  opacity:0;animation:fadeUp 1s 0.5s forwards;
+}
+.hero-title{
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(4rem,11vw,9rem);
+  font-weight:900;line-height:0.9;
+  letter-spacing:-0.03em;text-transform:uppercase;
+  opacity:0;animation:fadeUp 1s 0.7s forwards;
+}
+.hero-title .outline{
+  -webkit-text-stroke:1.5px var(--red);
+  color:transparent;
+}
+.hero-subtitle{
+  font-size:15px;color:var(--muted);
+  margin-top:24px;letter-spacing:0.05em;
+  opacity:0;animation:fadeUp 1s 0.9s forwards;
+}
+.hero-cta{
+  margin-top:48px;
+  font-family:'Orbitron',sans-serif;
+  font-size:12px;font-weight:700;letter-spacing:0.2em;
+  text-transform:uppercase;color:var(--red);
+  opacity:0;animation:fadeUp 1s 1.1s forwards, blink 1.5s 2s infinite;
+  pointer-events:all;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+}
+.cta-arrow{
+  width:1px;height:40px;background:var(--red);
+  position:relative;
+  animation:arrowPulse 1.5s 2s infinite;
+}
+.cta-arrow::after{
+  content:'';position:absolute;bottom:0;left:-4px;
+  border-left:4px solid transparent;
+  border-right:4px solid transparent;
+  border-top:8px solid var(--red);
+}
+@keyframes arrowPulse{0%,100%{opacity:0.4;transform:scaleY(1)}50%{opacity:1;transform:scaleY(1.2)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.5}}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 48px;
+  background:rgba(5,5,5,0);
+  backdrop-filter:blur(0px);
+  transition:all 0.4s ease;
+  border-bottom:1px solid transparent;
+}
+nav.scrolled{
+  background:rgba(5,5,5,0.92);
+  backdrop-filter:blur(20px);
+  border-bottom-color:var(--glass-b);
+}
+.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:16px;letter-spacing:0.2em}
+.logo em{color:var(--red);font-style:normal}
+.nav-links{display:flex;gap:32px;list-style:none}
+.nav-links a{color:var(--muted);font-size:12px;text-decoration:none;letter-spacing:0.12em;text-transform:uppercase;transition:color 0.2s}
+.nav-links a:hover{color:var(--white)}
+.live-badge{
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  letter-spacing:0.15em;color:var(--red);
+  border:1px solid rgba(232,0,29,0.3);padding:5px 12px;border-radius:2px;
+  animation:livePulse 2s infinite;
+}
+@keyframes livePulse{0%,100%{border-color:rgba(232,0,29,0.3)}50%{border-color:rgba(232,0,29,0.8)}}
+
+/* TICKER */
+.ticker{
+  border-top:1px solid var(--glass-b);border-bottom:1px solid var(--glass-b);
+  padding:13px 0;overflow:hidden;background:rgba(232,0,29,0.03);
+}
+.ticker-track{
+  display:flex;gap:64px;animation:tickerMove 25s linear infinite;
+  white-space:nowrap;
+}
+.ti{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;letter-spacing:0.2em;color:var(--muted);
+  text-transform:uppercase;flex-shrink:0;
+}
+.ti b{color:var(--red);font-weight:500;margin-right:8px}
+@keyframes tickerMove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* SECTIONS */
+section{padding:96px 64px;position:relative;z-index:1}
+.sec-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:0.35em;color:var(--red);
+  text-transform:uppercase;margin-bottom:16px;
+}
+.sec-title{
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(2.2rem,4.5vw,3.8rem);
+  font-weight:700;line-height:1;letter-spacing:-0.02em;
+  margin-bottom:56px;
+}
+.sec-title .dim{color:var(--muted)}
+
+/* GLASS */
+.g{
+  background:var(--glass);
+  backdrop-filter:blur(20px) saturate(1.6);
+  border:1px solid var(--glass-b);
+  border-radius:3px;padding:32px;
+  transition:border-color 0.3s,background 0.3s;
+}
+.g:hover{border-color:rgba(232,0,29,0.25);background:rgba(232,0,29,0.025)}
+
+/* REVEAL */
+.rv{opacity:0;transform:translateY(28px);transition:opacity 0.8s ease,transform 0.8s ease}
+.rv.on{opacity:1;transform:translateY(0)}
+
+/* STATS GRID */
+.stats-stripe{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  border:1px solid var(--glass-b);border-radius:3px;overflow:hidden;
+}
+.stat-c{
+  padding:48px 32px;text-align:center;
+  border-right:1px solid var(--glass-b);
+  transition:background 0.3s;
+}
+.stat-c:last-child{border-right:none}
+.stat-c:hover{background:rgba(232,0,29,0.04)}
+.stat-big{
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(2.5rem,4.5vw,4.2rem);
+  font-weight:900;color:var(--red);line-height:1;
+}
+.stat-desc{font-size:12px;color:var(--muted);margin-top:14px;letter-spacing:0.05em}
+
+/* PROCESS */
+.proc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:48px}
+.proc{
+  padding:32px 24px;border:1px solid var(--glass-b);border-radius:3px;
+  position:relative;overflow:hidden;transition:border-color 0.3s;
+}
+.proc::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--red),rgba(232,0,29,0));
+  transform:scaleX(0);transform-origin:left;transition:transform 0.5s ease;
+}
+.proc:hover::before{transform:scaleX(1)}
+.proc:hover{border-color:rgba(232,0,29,0.3)}
+.proc-n{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;color:var(--red);letter-spacing:0.2em;margin-bottom:24px;
+}
+.proc-t{font-family:'Orbitron',sans-serif;font-size:15px;font-weight:700;margin-bottom:12px}
+.proc-d{font-size:13px;color:var(--muted);line-height:1.7}
+
+/* DASHBOARD */
+.db-grid{
+  display:grid;
+  grid-template-columns:1.3fr 1fr;
+  gap:16px;
+}
+.db-grid2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;margin-top:16px;
+}
+.metric-l{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
+.metric-v{font-family:'Orbitron',sans-serif;font-size:38px;font-weight:900;line-height:1}
+.metric-v.r{color:var(--red)}
+.metric-s{font-size:12px;color:var(--muted);margin-top:6px}
+
+/* DRIVER LIST */
+.dr-list{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+.dr{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;
+  background:rgba(255,255,255,0.02);
+  border-radius:2px;border-left:2px solid transparent;
+  transition:all 0.2s;cursor:pointer;
+}
+.dr:hover{border-left-color:var(--red);background:rgba(232,0,29,0.04)}
+.dr-pos{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:var(--muted);width:18px}
+.dr-pos.p1{color:var(--red)}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.s{background:#e8001d}.m{background:#ffd600}.h{background:#f0ede8}
+.dr-name{flex:1;font-size:13px;font-weight:500;letter-spacing:0.04em}
+.dr-team{font-size:11px;color:var(--muted)}
+.dr-t{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--white)}
+.dr-g{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);width:58px;text-align:right}
+
+/* BARS */
+.bars{display:flex;align-items:flex-end;gap:3px;height:72px;margin-top:14px}
+.bar{flex:1;border-radius:1px 1px 0 0;background:var(--glass-b);transition:background 0.3s}
+.bar:hover{background:var(--red)}
+
+/* PREDICTOR */
+.pred-form{display:flex;flex-direction:column;gap:18px;margin-top:20px}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.f-grp{display:flex;flex-direction:column;gap:7px}
+.f-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase}
+.f-inp,.f-sel{
+  background:rgba(255,255,255,0.04);border:1px solid var(--glass-b);
+  border-radius:2px;padding:10px 14px;color:var(--white);
+  font-family:'DM Sans',sans-serif;font-size:14px;outline:none;
+  transition:border-color 0.2s;-webkit-appearance:none;
+}
+.f-inp:focus,.f-sel:focus{border-color:var(--red)}
+.f-sel option{background:#0e0e0e}
+.pred-btn{
+  background:var(--red);color:var(--white);border:none;border-radius:2px;
+  padding:13px 28px;font-family:'Orbitron',sans-serif;font-size:11px;
+  font-weight:700;letter-spacing:0.2em;text-transform:uppercase;
+  cursor:pointer;transition:opacity 0.2s,transform 0.1s;align-self:flex-start;
+}
+.pred-btn:hover{opacity:0.85;transform:translateY(-1px)}
+.result{
+  margin-top:18px;padding:22px;
+  background:rgba(232,0,29,0.06);border:1px solid rgba(232,0,29,0.2);
+  border-radius:2px;display:none;
+}
+.result.show{display:block}
+.res-t{font-family:'Orbitron',sans-serif;font-size:44px;font-weight:900;color:var(--red)}
+.res-l{font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:0.1em}
+
+/* COMMENTARY */
+.c-btns{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.c-btn{
+  font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.12em;
+  text-transform:uppercase;padding:8px 14px;border-radius:2px;cursor:pointer;
+  border:1px solid var(--glass-b);background:transparent;color:var(--muted);transition:all 0.2s;
+}
+.c-btn.on,.c-btn:hover{border-color:var(--red);color:var(--white);background:rgba(232,0,29,0.1)}
+.c-out{
+  background:rgba(255,255,255,0.02);border-radius:2px;padding:22px;
+  min-height:110px;font-size:14px;line-height:1.8;color:var(--muted);
+  font-style:italic;border-left:2px solid var(--red);transition:opacity 0.3s;
+}
+.c-gen{
+  margin-top:14px;background:transparent;border:1px solid var(--red);
+  color:var(--red);border-radius:2px;padding:12px 22px;
+  font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;
+}
+.c-gen:hover{background:var(--red);color:var(--white)}
+
+/* FOOTER */
+footer{
+  border-top:1px solid var(--glass-b);padding:40px 64px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.f-logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:15px;letter-spacing:0.2em}
+.f-logo em{color:var(--red);font-style:normal}
+.f-copy{font-size:12px;color:var(--muted)}
+
+@media(max-width:768px){
+  nav{padding:16px 24px}
+  .nav-links{display:none}
+  section{padding:64px 24px}
+  .db-grid{grid-template-columns:1fr}
+  .proc-grid{grid-template-columns:1fr 1fr}
+  .stats-stripe{grid-template-columns:1fr 1fr}
+  footer{flex-direction:column;gap:12px;text-align:center;padding:32px 24px}
+}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <div class="logo">PIT<em>WALL</em> AI</div>
+  <ul class="nav-links">
+    <li><a href="#analytics">Analytics</a></li>
+    <li><a href="#predictor">Predictor</a></li>
+    <li><a href="#commentary">Commentary</a></li>
+    <li><a href="#process">About</a></li>
+  </ul>
+  <div class="live-badge">● Live</div>
+</nav>
+
+<!-- 3D HERO -->
+<div id="hero" onclick="scrollToContent()">
+  <canvas id="three-canvas"></canvas>
+  <div class="hero-content">
+    <div class="hero-eyebrow">F1 Intelligence Platform — Season 2024</div>
+    <div class="hero-title">PIT<br><span class="outline">WALL</span><br>AI</div>
+    <div class="hero-subtitle">Real telemetry · Machine learning · AI commentary</div>
+    <a href="https://pitwall-ai-ml-ananya.streamlit.app/" target="_blank" style="display:inline-block;margin-bottom:24px;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.2em;background:#e8001d;color:white;padding:14px 32px;border-radius:2px;text-decoration:none;pointer-events:all;">ENTER DASHBOARD →</a>
+    <div class="hero-cta">
+      <span>Click to enter</span>
+      <div class="cta-arrow"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-track">
+    <div class="ti"><b>VER</b>LEADER · +0.000</div>
+    <div class="ti"><b>LEC</b>P2 · +2.455s</div>
+    <div class="ti"><b>NOR</b>P3 · +7.330s</div>
+    <div class="ti"><b>HAM</b>P4 · +11.01s</div>
+    <div class="ti"><b>SAI</b>P5 · +14.88s</div>
+    <div class="ti"><b>DATA</b>6,745 laps loaded</div>
+    <div class="ti"><b>MAE</b>1.44s · XGBoost</div>
+    <div class="ti"><b>RACES</b>6 · Bahrain · Monaco · Australia</div>
+    <div class="ti"><b>VER</b>LEADER · +0.000</div>
+    <div class="ti"><b>LEC</b>P2 · +2.455s</div>
+    <div class="ti"><b>NOR</b>P3 · +7.330s</div>
+    <div class="ti"><b>HAM</b>P4 · +11.01s</div>
+    <div class="ti"><b>SAI</b>P5 · +14.88s</div>
+    <div class="ti"><b>DATA</b>6,745 laps loaded</div>
+    <div class="ti"><b>MAE</b>1.44s · XGBoost</div>
+    <div class="ti"><b>RACES</b>6 · Bahrain · Monaco · Australia</div>
+  </div>
+</div>
+
+<!-- STATS -->
+<section style="padding:64px 64px">
+  <div class="stats-stripe rv">
+    <div class="stat-c"><div class="stat-big">6,745</div><div class="stat-desc">Real F1 laps in dataset</div></div>
+    <div class="stat-c"><div class="stat-big">1.44s</div><div class="stat-desc">Model mean absolute error</div></div>
+    <div class="stat-c"><div class="stat-big">6</div><div class="stat-desc">Races — 2023 & 2024</div></div>
+    <div class="stat-c"><div class="stat-big">3</div><div class="stat-desc">AI commentary styles</div></div>
+  </div>
+</section>
+
+<!-- DASHBOARD -->
+<section id="analytics" style="padding-top:0">
+  <div class="sec-label">// Race Analytics</div>
+  <div class="sec-title">Live Race <span class="dim">Dashboard</span></div>
+
+  <div class="db-grid">
+    <div class="g rv">
+      <div class="metric-l">Driver standings — Monaco 2024</div>
+      <div class="dr-list">
+        <div class="dr"><div class="dr-pos p1">01</div><div class="dot s"></div><div><div class="dr-name">LECLERC</div><div class="dr-team">Ferrari</div></div><div class="dr-t">1:13.842</div><div class="dr-g">LEADER</div></div>
+        <div class="dr"><div class="dr-pos">02</div><div class="dot s"></div><div><div class="dr-name">PIASTRI</div><div class="dr-team">McLaren</div></div><div class="dr-t">1:14.011</div><div class="dr-g">+2.455s</div></div>
+        <div class="dr"><div class="dr-pos">03</div><div class="dot m"></div><div><div class="dr-name">SAINZ</div><div class="dr-team">Ferrari</div></div><div class="dr-t">1:14.203</div><div class="dr-g">+4.112s</div></div>
+        <div class="dr"><div class="dr-pos">04</div><div class="dot m"></div><div><div class="dr-name">NORRIS</div><div class="dr-team">McLaren</div></div><div class="dr-t">1:14.441</div><div class="dr-g">+7.330s</div></div>
+        <div class="dr"><div class="dr-pos">05</div><div class="dot h"></div><div><div class="dr-name">VERSTAPPEN</div><div class="dr-team">Red Bull</div></div><div class="dr-t">1:14.892</div><div class="dr-g">+11.01s</div></div>
+        <div class="dr"><div class="dr-pos">06</div><div class="dot h"></div><div><div class="dr-name">HAMILTON</div><div class="dr-team">Mercedes</div></div><div class="dr-t">1:15.102</div><div class="dr-g">+14.22s</div></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="g rv">
+        <div class="metric-l">Lap time distribution</div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end">
+          <div class="metric-v r">91.4<span style="font-size:18px;color:var(--muted)">s</span></div>
+          <div style="font-size:11px;color:var(--muted)">avg lap</div>
+        </div>
+        <div class="bars">
+          <div class="bar" style="height:40%;animation:growBar 0.6s 0.05s ease both"></div>
+          <div class="bar" style="height:60%;animation:growBar 0.6s 0.1s ease both"></div>
+          <div class="bar" style="height:75%;animation:growBar 0.6s 0.15s ease both"></div>
+          <div class="bar" style="height:88%;animation:growBar 0.6s 0.2s ease both"></div>
+          <div class="bar" style="height:95%;animation:growBar 0.6s 0.25s ease both;background:var(--red)"></div>
+          <div class="bar" style="height:80%;animation:growBar 0.6s 0.3s ease both"></div>
+          <div class="bar" style="height:70%;animation:growBar 0.6s 0.35s ease both"></div>
+          <div class="bar" style="height:85%;animation:growBar 0.6s 0.4s ease both;background:var(--red)"></div>
+          <div class="bar" style="height:55%;animation:growBar 0.6s 0.45s ease both"></div>
+          <div class="bar" style="height:35%;animation:growBar 0.6s 0.5s ease both"></div>
+          <div class="bar" style="height:22%;animation:growBar 0.6s 0.55s ease both"></div>
+        </div>
+      </div>
+      <div class="g rv">
+        <div class="metric-l">Model performance</div>
+        <div class="metric-v r">98.4%</div>
+        <div class="metric-s">XGBoost · 6,745 laps · MAE 1.44s</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PREDICTOR -->
+<section id="predictor" style="background:rgba(232,0,29,0.02)">
+  <div class="sec-label">// ML Model</div>
+  <div class="sec-title">Lap Time <span class="dim">Predictor</span></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+    <div class="g rv">
+      <div class="metric-l">Configure prediction</div>
+      <div class="pred-form">
+        <div class="f-row">
+          <div class="f-grp">
+            <label class="f-lbl">Tyre compound</label>
+            <select class="f-sel" id="compound">
+              <option value="2">SOFT</option>
+              <option value="1">MEDIUM</option>
+              <option value="0">HARD</option>
+            </select>
+          </div>
+          <div class="f-grp">
+            <label class="f-lbl">Tyre age (laps)</label>
+            <input type="number" class="f-inp" id="tyre-age" value="15" min="1" max="50">
+          </div>
+        </div>
+        <div class="f-row">
+          <div class="f-grp">
+            <label class="f-lbl">Lap number</label>
+            <input type="number" class="f-inp" id="lap-num" value="30" min="1" max="70">
+          </div>
+          <div class="f-grp">
+            <label class="f-lbl">Stint</label>
+            <input type="number" class="f-inp" id="stint" value="1" min="1" max="4">
+          </div>
+        </div>
+        <button class="pred-btn" onclick="predict()">▶ Run Prediction</button>
+      </div>
+      <div class="result" id="result">
+        <div class="res-l">Predicted lap time</div>
+        <div class="res-t" id="res-time">—</div>
+        <div class="res-l" style="margin-top:6px">Model MAE ±1.44s · XGBoost</div>
+      </div>
+    </div>
+    <div class="g rv">
+      <div class="metric-l" style="margin-bottom:20px">Model metrics</div>
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:7px">
+            <span style="font-size:12px;color:var(--muted)">Prediction accuracy</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--red)">98.4%</span>
+          </div>
+          <div style="height:2px;background:var(--glass-b);border-radius:1px">
+            <div style="height:100%;width:98%;background:var(--red);border-radius:1px"></div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:7px">
+            <span style="font-size:12px;color:var(--muted)">Training coverage</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--white)">6,745 laps</span>
+          </div>
+          <div style="height:2px;background:var(--glass-b);border-radius:1px">
+            <div style="height:100%;width:75%;background:rgba(240,237,232,0.3);border-radius:1px"></div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:7px">
+            <span style="font-size:12px;color:var(--muted)">Race coverage</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--white)">6 GPs</span>
+          </div>
+          <div style="height:2px;background:var(--glass-b);border-radius:1px">
+            <div style="height:100%;width:40%;background:rgba(240,237,232,0.3);border-radius:1px"></div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:28px;padding:18px;background:rgba(232,0,29,0.05);border-radius:2px;border:1px solid rgba(232,0,29,0.15)">
+        <div style="font-size:10px;color:var(--muted);letter-spacing:0.2em;text-transform:uppercase;margin-bottom:8px;font-family:'JetBrains Mono',monospace">Algorithm</div>
+        <div style="font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700">XGBoost Regressor</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px">300 estimators · depth 6 · lr 0.05</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMMENTARY -->
+<section id="commentary">
+  <div class="sec-label">// AI Commentary</div>
+  <div class="sec-title">Race <span class="dim">Commentator</span></div>
+  <div class="g rv" style="max-width:780px">
+    <div class="metric-l" style="margin-bottom:14px">Select style</div>
+    <div class="c-btns">
+      <button class="c-btn on" onclick="setStyle(this,'brundle')">Martin Brundle</button>
+      <button class="c-btn" onclick="setStyle(this,'crofty')">David Croft</button>
+      <button class="c-btn" onclick="setStyle(this,'analyst')">Data Analyst</button>
+    </div>
+    <div class="c-out" id="c-out">Click generate to produce AI race commentary from live lap data...</div>
+    <button class="c-gen" onclick="genComment()">▶ Generate Commentary</button>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section id="process" style="background:rgba(232,0,29,0.02)">
+  <div class="sec-label">// Architecture</div>
+  <div class="sec-title">The <span class="dim">Pipeline</span></div>
+  <div class="proc-grid">
+    <div class="proc rv">
+      <div class="proc-n">01 — Ingest</div>
+      <div class="proc-t">Data Pipeline</div>
+      <div class="proc-d">FastF1 API pulls real telemetry, lap times, tyre data from every race weekend. Stored in Firebase Firestore.</div>
+    </div>
+    <div class="proc rv">
+      <div class="proc-n">02 — Train</div>
+      <div class="proc-t">ML Model</div>
+      <div class="proc-d">XGBoost regressor trained on 6,745 laps. Features: tyre age, compound, stint, driver, circuit.</div>
+    </div>
+    <div class="proc rv">
+      <div class="proc-n">03 — Predict</div>
+      <div class="proc-t">Inference</div>
+      <div class="proc-d">Real-time lap time predictions with 1.44s MAE. Bayesian championship simulator runs Monte Carlo outcomes.</div>
+    </div>
+    <div class="proc rv">
+      <div class="proc-n">04 — Narrate</div>
+      <div class="proc-t">LLM Layer</div>
+      <div class="proc-d">Groq LLaMA 70B generates live race commentary in three styles from raw telemetry data.</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="f-logo">PIT<em>WALL</em> AI</div>
+  <div class="f-copy">Built by Ananya Sekar · F1 × Machine Learning · 2024</div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ── THREE.JS 3D SCENE ── */
+(function(){
+  const canvas = document.getElementById('three-canvas');
+  const W = window.innerWidth, H = window.innerHeight;
+  const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+  renderer.setSize(W, H);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setClearColor(0x050505, 1);
+
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x050505, 0.018);
+
+  const camera = new THREE.PerspectiveCamera(55, W/H, 0.1, 200);
+  camera.position.set(0, 3, 12);
+  camera.lookAt(0, 0, 0);
+
+  // LIGHTS
+  const ambient = new THREE.AmbientLight(0xffffff, 0.15);
+  scene.add(ambient);
+  const headlight = new THREE.PointLight(0xe8001d, 4, 20);
+  headlight.position.set(0, 2, 8);
+  scene.add(headlight);
+  const rimL = new THREE.DirectionalLight(0xe8001d, 2);
+  rimL.position.set(-8, 3, -4);
+  scene.add(rimL);
+  const topL = new THREE.DirectionalLight(0xffffff, 1.5);
+  topL.position.set(0, 10, 5);
+  scene.add(topL);
+  const underL = new THREE.PointLight(0xe8001d, 3, 8);
+  underL.position.set(0, -1, 0);
+  scene.add(underL);
+
+  // MATERIALS
+  const bodyMat = new THREE.MeshStandardMaterial({
+    color:0xe8001d, metalness:0.9, roughness:0.08,
+    envMapIntensity:1.5
+  });
+  const darkMat = new THREE.MeshStandardMaterial({
+    color:0x111111, metalness:0.95, roughness:0.05
+  });
+  const carbonMat = new THREE.MeshStandardMaterial({
+    color:0x1a1a1a, metalness:0.8, roughness:0.2
+  });
+  const tyreMat = new THREE.MeshStandardMaterial({
+    color:0x0a0a0a, metalness:0.1, roughness:0.9
+  });
+  const rimMat = new THREE.MeshStandardMaterial({
+    color:0xcccccc, metalness:1, roughness:0.05
+  });
+  const glareMat = new THREE.MeshStandardMaterial({
+    color:0xffffff, metalness:0, roughness:0,
+    transparent:true, opacity:0.6, emissive:0xffffff, emissiveIntensity:0.3
+  });
+
+  const car = new THREE.Group();
+
+  // ── CHASSIS / MONOCOQUE ──
+  const chassisGeo = new THREE.BoxGeometry(0.9, 0.28, 3.8);
+  const chassis = new THREE.Mesh(chassisGeo, bodyMat);
+  chassis.position.set(0, 0.22, 0);
+  car.add(chassis);
+
+  // Side pods
+  [-1,1].forEach(side => {
+    const podGeo = new THREE.BoxGeometry(0.38, 0.22, 1.6);
+    const pod = new THREE.Mesh(podGeo, bodyMat);
+    pod.position.set(side * 0.62, 0.14, 0.2);
+    car.add(pod);
+
+    // Pod inlet
+    const inletGeo = new THREE.BoxGeometry(0.12, 0.16, 0.08);
+    const inlet = new THREE.Mesh(inletGeo, darkMat);
+    inlet.position.set(side * 0.72, 0.14, 0.8);
+    car.add(inlet);
+  });
+
+  // ── NOSE ──
+  const nosePath = new THREE.CylinderGeometry(0.05, 0.38, 1.8, 8);
+  const nose = new THREE.Mesh(nosePath, bodyMat);
+  nose.rotation.z = Math.PI/2;
+  nose.rotation.y = Math.PI/2;
+  nose.position.set(0, 0.22, 2.6);
+  car.add(nose);
+
+  // Nose tip
+  const tipGeo = new THREE.SphereGeometry(0.06, 8, 8);
+  const tip = new THREE.Mesh(tipGeo, darkMat);
+  tip.position.set(0, 0.22, 3.5);
+  car.add(tip);
+
+  // ── COCKPIT ──
+  const cockpitGeo = new THREE.BoxGeometry(0.52, 0.32, 0.9);
+  const cockpit = new THREE.Mesh(cockpitGeo, darkMat);
+  cockpit.position.set(0, 0.42, 0.4);
+  car.add(cockpit);
+
+  // Halo
+  const haloGeo = new THREE.TorusGeometry(0.28, 0.028, 8, 20, Math.PI);
+  const halo = new THREE.Mesh(haloGeo, carbonMat);
+  halo.rotation.x = -0.15;
+  halo.position.set(0, 0.62, 0.4);
+  car.add(halo);
+
+  // Halo pillar front
+  const hpGeo = new THREE.CylinderGeometry(0.022, 0.022, 0.2, 8);
+  const hp = new THREE.Mesh(hpGeo, carbonMat);
+  hp.position.set(0, 0.52, 0.66);
+  car.add(hp);
+
+  // Visor
+  const visorGeo = new THREE.BoxGeometry(0.4, 0.12, 0.45);
+  const visor = new THREE.Mesh(visorGeo, glareMat);
+  visor.position.set(0, 0.5, 0.55);
+  car.add(visor);
+
+  // ── ENGINE COVER + AIRBOX ──
+  const airboxGeo = new THREE.BoxGeometry(0.26, 0.42, 0.7);
+  const airbox = new THREE.Mesh(airboxGeo, bodyMat);
+  airbox.position.set(0, 0.56, -0.18);
+  car.add(airbox);
+
+  // Airbox inlet
+  const aiGeo = new THREE.BoxGeometry(0.18, 0.1, 0.06);
+  const ai = new THREE.Mesh(aiGeo, darkMat);
+  ai.position.set(0, 0.72, 0.17);
+  car.add(ai);
+
+  // Engine cover
+  const ecGeo = new THREE.BoxGeometry(0.62, 0.18, 1.6);
+  const ec = new THREE.Mesh(ecGeo, bodyMat);
+  ec.position.set(0, 0.32, -0.7);
+  car.add(ec);
+
+  // ── REAR ──
+  const rearGeo = new THREE.BoxGeometry(0.55, 0.38, 0.5);
+  const rear = new THREE.Mesh(rearGeo, bodyMat);
+  rear.position.set(0, 0.24, -2.1);
+  car.add(rear);
+
+  // Diffuser
+  const diffGeo = new THREE.BoxGeometry(0.9, 0.12, 0.55);
+  const diff = new THREE.Mesh(diffGeo, carbonMat);
+  diff.position.set(0, 0.06, -2.1);
+  car.add(diff);
+
+  // ── FRONT WING ──
+  const fwGeo = new THREE.BoxGeometry(1.85, 0.04, 0.5);
+  const fw = new THREE.Mesh(fwGeo, bodyMat);
+  fw.position.set(0, 0.08, 3.2);
+  car.add(fw);
+
+  // Front wing main
+  const fwmGeo = new THREE.BoxGeometry(1.55, 0.06, 0.28);
+  const fwm = new THREE.Mesh(fwmGeo, bodyMat);
+  fwm.position.set(0, 0.12, 3.35);
+  car.add(fwm);
+
+  // Front wing endplates
+  [-1,1].forEach(s => {
+    const epGeo = new THREE.BoxGeometry(0.04, 0.18, 0.5);
+    const ep = new THREE.Mesh(epGeo, bodyMat);
+    ep.position.set(s*0.92, 0.12, 3.2);
+    car.add(ep);
+  });
+
+  // ── REAR WING ──
+  const rwGeo = new THREE.BoxGeometry(1.1, 0.05, 0.35);
+  const rw = new THREE.Mesh(rwGeo, bodyMat);
+  rw.position.set(0, 0.92, -2.1);
+  car.add(rw);
+
+  const rw2Geo = new THREE.BoxGeometry(1.0, 0.04, 0.28);
+  const rw2 = new THREE.Mesh(rw2Geo, bodyMat);
+  rw2.position.set(0, 0.82, -2.06);
+  car.add(rw2);
+
+  // Rear wing endplates
+  [-1,1].forEach(s => {
+    const repGeo = new THREE.BoxGeometry(0.04, 0.5, 0.38);
+    const rep = new THREE.Mesh(repGeo, bodyMat);
+    rep.position.set(s*0.55, 0.72, -2.1);
+    car.add(rep);
+  });
+
+  // DRS actuator
+  const drsGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.48, 6);
+  const drs = new THREE.Mesh(drsGeo, carbonMat);
+  drs.position.set(0, 0.72, -2.08);
+  car.add(drs);
+
+  // ── WHEELS ──
+  const wheelPositions = [
+    {x:-0.9, y:0, z:1.7},  // FL
+    {x: 0.9, y:0, z:1.7},  // FR
+    {x:-0.95, y:0, z:-1.5}, // RL
+    {x: 0.95, y:0, z:-1.5}, // RR
+  ];
+  const wRad = [0.33,0.33,0.36,0.36];
+
+  wheelPositions.forEach((pos,i) => {
+    const r = wRad[i];
+    const wGrp = new THREE.Group();
+
+    // Tyre
+    const tyreGeo = new THREE.CylinderGeometry(r, r, i<2?0.28:0.34, 20);
+    const tyre = new THREE.Mesh(tyreGeo, tyreMat);
+    tyre.rotation.z = Math.PI/2;
+    wGrp.add(tyre);
+
+    // Rim
+    const rimGeo = new THREE.CylinderGeometry(r*0.62, r*0.62, i<2?0.3:0.36, 16);
+    const rim = new THREE.Mesh(rimGeo, rimMat);
+    rim.rotation.z = Math.PI/2;
+    wGrp.add(rim);
+
+    // Rim spokes
+    for(let s=0;s<5;s++){
+      const spokeGeo = new THREE.BoxGeometry(0.04, r*0.95, 0.04);
+      const spoke = new THREE.Mesh(spokeGeo, rimMat);
+      spoke.rotation.x = s*(Math.PI*2/5);
+      spoke.rotation.z = Math.PI/2;
+      rim.add(spoke);
+    }
+
+    // Brake disc glow
+    const discGeo = new THREE.CylinderGeometry(r*0.38, r*0.38, 0.04, 16);
+    const discMat = new THREE.MeshStandardMaterial({
+      color:0xe8001d, emissive:0xe8001d, emissiveIntensity:0.4,
+      metalness:0.5, roughness:0.3
+    });
+    const disc = new THREE.Mesh(discGeo, discMat);
+    disc.rotation.z = Math.PI/2;
+    wGrp.add(disc);
+
+    wGrp.position.set(pos.x, pos.y + r, pos.z);
+    car.add(wGrp);
+  });
+
+  // ── BARGEBOARD / TURNING VANES ──
+  [-1,1].forEach(s => {
+    for(let i=0;i<3;i++){
+      const vGeo = new THREE.BoxGeometry(0.26, 0.12, 0.04);
+      const v = new THREE.Mesh(vGeo, carbonMat);
+      v.position.set(s*0.52, 0.08+i*0.04, 0.9+i*0.15);
+      v.rotation.y = s*0.15;
+      car.add(v);
+    }
+  });
+
+  // ── EXHAUST ──
+  const exGeo = new THREE.CylinderGeometry(0.04, 0.055, 0.3, 8);
+  const exMat = new THREE.MeshStandardMaterial({color:0x444444, metalness:0.9, roughness:0.3});
+  const ex = new THREE.Mesh(exGeo, exMat);
+  ex.rotation.x = Math.PI/2;
+  ex.position.set(0, 0.35, -1.85);
+  car.add(ex);
+
+  // Logo on side
+  scene.add(car);
+
+  // ── TRACK SURFACE ──
+  const trackGeo = new THREE.PlaneGeometry(60, 60);
+  const trackMat = new THREE.MeshStandardMaterial({
+    color:0x0a0a0a, metalness:0.0, roughness:0.95
+  });
+  const track = new THREE.Mesh(trackGeo, trackMat);
+  track.rotation.x = -Math.PI/2;
+  track.position.y = -0.01;
+  scene.add(track);
+
+  // Track lines
+  for(let i=-3;i<=3;i++){
+    const lineGeo = new THREE.PlaneGeometry(0.08, 40);
+    const lineMat = new THREE.MeshStandardMaterial({
+      color:0x222222, metalness:0, roughness:1
+    });
+    const line = new THREE.Mesh(lineGeo, lineMat);
+    line.rotation.x = -Math.PI/2;
+    line.position.set(i*2.5, 0.001, 0);
+    scene.add(line);
+  }
+
+  // ── PARTICLES ──
+  const particleCount = 300;
+  const pGeo = new THREE.BufferGeometry();
+  const pPos = new Float32Array(particleCount*3);
+  for(let i=0;i<particleCount;i++){
+    pPos[i*3]   = (Math.random()-0.5)*60;
+    pPos[i*3+1] = Math.random()*20;
+    pPos[i*3+2] = (Math.random()-0.5)*60;
+  }
+  pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+  const pMat = new THREE.PointsMaterial({
+    color:0xe8001d, size:0.06, transparent:true, opacity:0.4
+  });
+  const particles = new THREE.Points(pGeo, pMat);
+  scene.add(particles);
+
+  // ── SPEED LINES ──
+  const speedLines = [];
+  for(let i=0;i<20;i++){
+    const slGeo = new THREE.BufferGeometry();
+    const z = -5 - Math.random()*20;
+    const x = (Math.random()-0.5)*12;
+    const y = 0.3 + Math.random()*3;
+    const len = 1+Math.random()*4;
+    const pts = new Float32Array([x,y,z, x,y,z+len]);
+    slGeo.setAttribute('position', new THREE.BufferAttribute(pts,3));
+    const slMat = new THREE.LineBasicMaterial({
+      color:0xe8001d, transparent:true, opacity:0.15+Math.random()*0.2
+    });
+    const sl = new THREE.Line(slGeo, slMat);
+    scene.add(sl);
+    speedLines.push({line:sl, speed:0.3+Math.random()*0.8, x, y});
+  }
+
+  // ── REFLECTIVE GROUND PLANE ──
+  const reflGeo = new THREE.PlaneGeometry(20, 8);
+  const reflMat = new THREE.MeshStandardMaterial({
+    color:0x111111, metalness:0.9, roughness:0.05,
+    transparent:true, opacity:0.6
+  });
+  const refl = new THREE.Mesh(reflGeo, reflMat);
+  refl.rotation.x = -Math.PI/2;
+  refl.position.y = -0.005;
+  scene.add(refl);
+
+  // ── MOUSE ──
+  let mx=0, my=0;
+  document.addEventListener('mousemove', e=>{
+    mx = (e.clientX/window.innerWidth-0.5)*2;
+    my = (e.clientY/window.innerHeight-0.5)*2;
+  });
+
+  // ── ANIMATION ──
+  let t=0;
+  function animate(){
+    requestAnimationFrame(animate);
+    t += 0.012;
+
+    // Car hover
+    car.position.y = Math.sin(t*0.8)*0.06;
+    car.rotation.y = Math.sin(t*0.4)*0.08 + mx*0.12;
+    car.rotation.z = Math.sin(t*0.5)*0.015;
+    car.rotation.x = -my*0.04;
+
+    // Camera drift
+    camera.position.x += (mx*2 - camera.position.x)*0.04;
+    camera.position.y += (3 - my*0.8 - camera.position.y)*0.04;
+    camera.lookAt(0, 0.5, 0);
+
+    // Headlight pulse
+    headlight.intensity = 3.5 + Math.sin(t*3)*0.5;
+    underL.intensity = 2.5 + Math.sin(t*2)*1;
+
+    // Particles drift
+    particles.rotation.y = t*0.02;
+
+    // Speed lines scroll
+    speedLines.forEach(sl => {
+      const pos = sl.line.geometry.attributes.position;
+      pos.array[2] += sl.speed;
+      pos.array[5] += sl.speed;
+      if(pos.array[2] > 15){
+        pos.array[2] = -25;
+        pos.array[5] = pos.array[2]+3;
+      }
+      pos.needsUpdate = true;
+    });
+
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize', ()=>{
+    const w=window.innerWidth, h=window.innerHeight;
+    camera.aspect = w/h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w,h);
+  });
+})();
+
+/* ── NAV SCROLL ── */
+window.addEventListener('scroll', ()=>{
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 60);
+});
+
+/* ── SCROLL TO CONTENT ── */
+function scrollToContent(){
+  document.querySelector('.ticker').scrollIntoView({behavior:'smooth'});
+}
+
+/* ── REVEAL ── */
+const rvEls = document.querySelectorAll('.rv');
+const rvObs = new IntersectionObserver((entries)=>{
+  entries.forEach((e,i)=>{
+    if(e.isIntersecting){
+      setTimeout(()=>e.target.classList.add('on'), i*100);
+      rvObs.unobserve(e.target);
+    }
+  });
+},{threshold:0.1});
+rvEls.forEach(el=>rvObs.observe(el));
+
+/* ── BAR ANIMATION ── */
+document.addEventListener('DOMContentLoaded',()=>{
+  const style = document.createElement('style');
+  style.textContent='@keyframes growBar{from{transform:scaleY(0)}to{transform:scaleY(1)}}';
+  document.head.appendChild(style);
+});
+
+/* ── PREDICTOR ── */
+function predict(){
+  const c = parseInt(document.getElementById('compound').value);
+  const a = parseInt(document.getElementById('tyre-age').value);
+  const l = parseInt(document.getElementById('lap-num').value);
+  const s = parseInt(document.getElementById('stint').value);
+  const deg = a*(c===2?0.045:c===1?0.026:0.014);
+  const lE = l>40?(l-40)*0.055:0;
+  const sE = (s-1)*0.3;
+  const raw = 89.8+deg+lE+sE+(Math.random()-0.5)*0.6;
+  const m=Math.floor(raw/60), sec=(raw%60).toFixed(3).padStart(6,'0');
+  document.getElementById('res-time').textContent=`${m}:${sec}`;
+  const r=document.getElementById('result');
+  r.classList.add('show');
+}
+
+/* ── COMMENTARY ── */
+let cStyle='brundle';
+function setStyle(btn,s){
+  document.querySelectorAll('.c-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');cStyle=s;
+}
+const cx={
+  brundle:[
+    "Leclerc is threading the needle beautifully here at Monaco. Those soft tyres, 18 laps old, are showing remarkable resilience — the Ferrari engineers will be watching that degradation curve carefully. Verstappen's gap at 3.2s on this circuit might as well be the Mediterranean Sea.",
+    "The data tells an interesting story. Lap 32 and we're seeing the classic Monaco dilemma — push and risk tyre failure, or manage pace and hope the pit window opens. Leclerc is riding that edge with extraordinary precision.",
+  ],
+  crofty:[
+    "AND IT IS LECLERC! Oh what a drive from the Monégasque! He's flying through the streets of his home race, 3.2 seconds clear and those soft tyres are HOLDING ON! Can he do it?! Can he win in Monte Carlo?! The crowd is ELECTRIC!",
+    "VERSTAPPEN IS CATCHING! But wait — WAIT — Leclerc pulls out a purple sector two! Where did THAT come from?! This is SENSATIONAL Formula One!",
+  ],
+  analyst:[
+    "Data: soft compound degradation at 0.042s/lap — within parameters. Predicted remaining stint: 6 laps before critical threshold. Verstappen's 3.2s gap closes undercut window. Probability of position retention: 73.4% based on historical Monaco data.",
+    "Lap 32 time of 91.4s is 0.3% above optimal pace curve — consistent with tyre management strategy. XGBoost model predicts 1:31.8 next lap. Championship points scenario: 3.2% improvement in title probability with race win.",
+  ]
+};
+function genComment(){
+  const out=document.getElementById('c-out');
+  out.style.opacity='0';
+  setTimeout(()=>{
+    const lines=cx[cStyle];
+    out.textContent=lines[Math.floor(Math.random()*lines.length)];
+    out.style.opacity='1';
+    out.style.transition='opacity 0.4s ease';
+  },200);
+}
+</script>
+</body>
+</html>
