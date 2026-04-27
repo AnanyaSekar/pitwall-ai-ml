@@ -69,11 +69,11 @@ This is not a toy dataset project. Every lap, tyre, and sector time comes from *
 | Metric | Value |
 |---|---|
 | **Algorithm** | XGBoost Regressor |
-| **Training laps** | 6,745 |
-| **Races** | Bahrain · Saudi Arabia · Australia · Monaco (2023–2024) |
-| **MAE** | **1.47 seconds** |
-| **RMSE** | **4.17 seconds** |
-| **R² Score** | **0.9987** |
+| **Training laps** | 22,126 |
+| **Races** | 15 GPs across 2022, 2023, 2024 |
+| **MAE** | **2.03 seconds** |
+| **RMSE** | **4.32 seconds** |
+| **R² Score** | **0.9972** |
 | **Cross-val R²** | **0.9831 ± 0.031 (5-fold)** |
 | **Estimators** | 300 · Max depth 6 · LR 0.05 |
 
