@@ -295,7 +295,7 @@ col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.markdown('<div class="metric-card"><div class="metric-label">Laps Analysed</div><div class="metric-value">22,126</div><div class="metric-sub">Real F1 telemetry</div></div>', unsafe_allow_html=True)
 with col2:
-    st.markdown('<div class="metric-card"><div class="metric-label">Model MAE</div><div class="metric-value">1.44s</div><div class="metric-sub">XGBoost Regressor</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="metric-card"><div class="metric-label">Model MAE</div><div class="metric-value">2.03s</div><div class="metric-sub">XGBoost Regressor</div></div>', unsafe_allow_html=True)
 with col3:
     st.markdown('<div class="metric-card"><div class="metric-label">Races Covered</div><div class="metric-value">15</div><div class="metric-sub">2023 — 2024 season</div></div>', unsafe_allow_html=True)
 with col4:
