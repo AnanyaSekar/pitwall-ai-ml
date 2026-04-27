@@ -282,7 +282,9 @@ def load_model():
 @st.cache_data
 def load_laps():
     if os.path.exists("data/laps.csv"):
-        return pd.read_csv("data/laps.csv")
+        df = pd.read_csv("data/laps.csv")
+        df = df[(df["lap_time_s"] > 60) & (df["lap_time_s"] < 300)]
+        return df
     return pd.DataFrame()
 
 model = load_model()
@@ -291,11 +293,11 @@ df = load_laps()
 # ── TOP METRICS ──
 col1, col2, col3, col4 = st.columns(4)
 with col1:
-    st.markdown('<div class="metric-card"><div class="metric-label">Laps Analysed</div><div class="metric-value">6,745</div><div class="metric-sub">Real F1 telemetry</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="metric-card"><div class="metric-label">Laps Analysed</div><div class="metric-value">22,126</div><div class="metric-sub">Real F1 telemetry</div></div>', unsafe_allow_html=True)
 with col2:
     st.markdown('<div class="metric-card"><div class="metric-label">Model MAE</div><div class="metric-value">1.44s</div><div class="metric-sub">XGBoost Regressor</div></div>', unsafe_allow_html=True)
 with col3:
-    st.markdown('<div class="metric-card"><div class="metric-label">Races Covered</div><div class="metric-value">6</div><div class="metric-sub">2023 — 2024 season</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="metric-card"><div class="metric-label">Races Covered</div><div class="metric-value">15</div><div class="metric-sub">2023 — 2024 season</div></div>', unsafe_allow_html=True)
 with col4:
     st.markdown('<div class="metric-card"><div class="metric-label">AI Styles</div><div class="metric-value">3</div><div class="metric-sub">Brundle · Crofty · Analyst</div></div>', unsafe_allow_html=True)
 
