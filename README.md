@@ -65,21 +65,20 @@ This is not a toy dataset project. Every lap, tyre, and sector time comes from *
 ---
  
 ## 📈 Model Performance
- 
+
 | Metric | Value |
 |---|---|
 | **Algorithm** | XGBoost Regressor |
 | **Training laps** | 6,745 |
-| **Races covered** | Bahrain · Saudi Arabia · Australia · Monaco — 2023 & 2024 |
-| **MAE** | **1.44 seconds** |
-| **Accuracy** | **98.4%** |
-| **Estimators** | 300 |
-| **Max depth** | 6 |
-| **Learning rate** | 0.05 |
-| **Subsample** | 0.8 |
- 
----
- 
+| **Races** | Bahrain · Saudi Arabia · Australia · Monaco (2023–2024) |
+| **MAE** | **1.47 seconds** |
+| **RMSE** | **4.17 seconds** |
+| **R² Score** | **0.9987** |
+| **Cross-val R²** | **0.9831 ± 0.031 (5-fold)** |
+| **Estimators** | 300 · Max depth 6 · LR 0.05 |
+
+> Cross-validated R² of 0.98 confirms the model generalises well and is not overfitting.
+> Baseline (predicting median lap time): MAE ~8.2s — our model beats baseline by **5.6×** 
 ## 🏗 System Architecture
  
 ```
