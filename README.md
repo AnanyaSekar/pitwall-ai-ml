@@ -78,7 +78,16 @@ This is not a toy dataset project. Every lap, tyre, and sector time comes from *
 | **Estimators** | 300 · Max depth 6 · LR 0.05 |
 
 > Cross-validated R² of 0.98 confirms the model generalises well and is not overfitting.
-> Baseline (predicting median lap time): MAE ~8.2s — our model beats baseline by **5.6×** 
+> Baseline (predicting median lap time): MAE ~8.2s — our model beats baseline by **5.6×**
+
+
+### 🔍 Feature Importance (SHAP)
+
+![SHAP Feature Importance](models/shap_importance.png)
+
+> **Tyre Age** is the strongest predictor of lap time — as tyres degrade, lap times increase non-linearly. **Circuit** is the second most important feature, confirming that track characteristics (Monaco vs Bahrain) dominate performance differences.
+
+
 ## 🏗 System Architecture
  
 ```
