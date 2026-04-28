@@ -597,6 +597,18 @@ with tab4:
                     "races": ["Bahrain", "Saudi Arabia", "Australia", "Monaco"],
                     "model_mae": "1.44s XGBoost"
                 }
-                answer = ask_race_question(prompt, context)
+                try:
+                    from llm.rag import rag_answer
+                    from groq import Groq
+                    import os
+                    groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+                    answer = rag_answer(prompt, groq_client)
+                except Exception as e:
+                    answer = ask_race_question(prompt, context)
+
+
+
+
+
                 st.write(answer)
                 st.session_state.messages.append({"role": "assistant", "content": answer})

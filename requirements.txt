@@ -12,3 +12,5 @@ plotly
 groq
 python-dotenv
 mlflow
+chromadb
+sentence-transformers
