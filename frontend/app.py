@@ -7,7 +7,9 @@ import numpy as np
 import sys, os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from llm.commentator import commentate, ask_race_question
-
+import time
+if "last_ping" not in st.session_state:
+    st.session_state.last_ping = time.time()
 st.set_page_config(
     page_title="PitWall AI — F1 Intelligence",
     page_icon="🏎",
