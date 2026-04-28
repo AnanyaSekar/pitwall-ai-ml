@@ -15,7 +15,7 @@
 ![ChromaDB](https://img.shields.io/badge/ChromaDB-Vector_DB-orange?style=flat-square)
  
 </div>
----
+
  
 ## 🔗 Live Links
  
@@ -24,7 +24,7 @@
 | 🌐 | [pitwall-ai-e6ac7.web.app](https://pitwall-ai-e6ac7.web.app) | 3D F1 landing page with Three.js |
 | 📊 | [pitwall-ai-ml-ananya.streamlit.app](https://pitwall-ai-ml-ananya.streamlit.app) | Full ML dashboard |
  
----
+
  
 ## 🧠 What is PitWall AI?
  
@@ -37,7 +37,6 @@ This is not a toy dataset project. Every lap, tyre, and sector time comes from *
  for Leclerc in Monaco 2024 — and the data backs it up."
 ```
  
----
  
 ## 🚀 Features
  
@@ -67,7 +66,6 @@ This is not a toy dataset project. Every lap, tyre, and sector time comes from *
 - Ask anything about F1 — strategy, tyres, drivers, regulations, race history
 - **Persistent chat memory** across the session using Streamlit session state
 - Answers grounded in 22,094 real laps via RAG retrieval
----
  
 ## 📈 Model Performance
  
@@ -91,7 +89,6 @@ This is not a toy dataset project. Every lap, tyre, and sector time comes from *
  
 > **Lap number** is the strongest predictor — race situation matters more than tyre state alone. **Circuit** is second, confirming Monaco vs Bahrain dominate performance differences. **Tyre Age** and **Compound** follow, capturing degradation curves accurately.
  
----
  
 ## 🔬 Key Findings from the Data
  
@@ -100,7 +97,7 @@ This is not a toy dataset project. Every lap, tyre, and sector time comes from *
 - **Soft tyres degrade at ~0.045s/lap** vs Hard at ~0.013s/lap — 3.5× faster degradation
 - **Verstappen's median pace at Bahrain 2023** was 0.4s faster than nearest rival
 - Our model **beats naive baseline by 5.6×** — MAE 2.03s vs baseline 8.2s
----
+
  
 ## 🏗 System Architecture
  
@@ -140,7 +137,7 @@ This is not a toy dataset project. Every lap, tyre, and sector time comes from *
 └─────────────────────────────────────────────────────────┘
 ```
  
----
+
  
 ## 📦 Tech Stack
  
@@ -158,7 +155,6 @@ This is not a toy dataset project. Every lap, tyre, and sector time comes from *
 | **3D Landing** | Three.js | Cinematic F1 car hero section |
 | **CI/CD** | GitHub Actions | Auto deploy on every push |
  
----
  
 ## 🗂 Project Structure
  
@@ -185,7 +181,6 @@ pitwall-ai/
 └── requirements.txt
 ```
  
----
  
 ## ⚡ Run Locally
  
@@ -213,7 +208,6 @@ streamlit run frontend/app.py
  
 > Get a free Groq API key at [console.groq.com](https://console.groq.com)
  
----
  
 ## 💡 Key Technical Decisions
  
@@ -229,7 +223,6 @@ Groq's LLaMA 3.3 70B is completely free with generous rate limits, and inference
 **Why Firestore instead of PostgreSQL?**
 No server to manage, free tier covers 1GB + 50k reads/day, and real-time updates are built in. Perfect for a project at this scale.
  
----
  
 ## 🔬 Model Explainability
  
@@ -237,7 +230,6 @@ The SHAP analysis revealed that **lap number** is the strongest predictor of lap
  
 Circuit encoding is the second most important feature, confirming that Monaco (78s laps) and Bahrain (91s laps) are fundamentally different prediction problems — the model correctly learns this from data.
  
----
  
 ## 👩‍💻 About
  
@@ -245,7 +237,7 @@ Built by **Ananya Sekar** — a data science and AI enthusiast who loves Formula
  
 This project was built from scratch — data pipeline, ML model, SHAP explainability, RAG pipeline, LLM integration, frontend, and deployment — using only free tools.
  
----
+
  
 <div align="center">
 **⭐ Star this repo if you found it useful!**
